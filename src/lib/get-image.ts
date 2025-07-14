@@ -1,17 +1,22 @@
-import chalk from 'chalk';
+import { exitWithMessage } from './exit-with-message';
 
 export async function getImage(
   path: string,
 ): Promise<Uint8Array<ArrayBufferLike> | undefined> {
   const image = Bun.file(path);
-  const type = image.type;
 
-  if (!type.includes('image')) {
-    console.log(chalk.red(`File at ${path} is not a valid image file.`));
-    return;
+  if (!(await image.exists())) {
+    exitWithMessage(`File at ${path} does not exist.`);
   }
 
-  const imageBytes = await image.bytes();
+  if (!image.type.includes('image')) {
+    exitWithMessage(`File at ${path} is not a valid image file.`);
+  }
 
-  return imageBytes;
+  try {
+    const imageBytes = await image.bytes();
+    return imageBytes;
+  } catch {
+    exitWithMessage('Error reading image.');
+  }
 }

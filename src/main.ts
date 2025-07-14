@@ -1,59 +1,35 @@
-import chalk from 'chalk';
 import terminalImage from 'terminal-image';
-import { parseArgs } from 'util';
+import { tryCatch } from 'try-catcher-ts';
 
+import { getConfig } from './lib/config/get-config';
+import { getArguments } from './lib/get-arguments';
 import { getImage } from './lib/get-image';
 import { invokeLocalModel } from './lib/invoke-local-model';
 
 async function main() {
-  try {
-    const { values, positionals } = parseArgs({
-      args: Bun.argv,
-      options: {
-        preview: {
-          type: 'boolean',
-          default: false,
-          short: 'p',
-        },
-      },
-      allowPositionals: true,
-    });
+  const { path, prompt, showPreview } = getArguments();
+  const config = await getConfig();
 
-    const path = positionals[2];
+  const image = await getImage(path);
 
-    if (!path) {
-      console.log(chalk.red('Please provide the path to an image.'));
-      return;
-    }
-
-    const image = await getImage(path);
-
-    if (!image) {
-      console.log(chalk.red(`Failed to load image at path: ${path}`));
-      return;
-    }
-
-    if (values.preview === true) {
+  if (image) {
+    if (showPreview === true) {
       console.log(await terminalImage.file(path, { width: 50 }));
     }
 
     await invokeLocalModel({
-      model: 'llava',
+      model: config.model,
       messages: [
         {
           role: 'user',
-          content:
-            'Describe all parts of this image in an accessibility-friendly format for alt text.',
+          content: prompt,
           images: [image],
         },
       ],
     });
 
     process.exit();
-  } catch (error) {
-    console.error(chalk.red('An error occurred:'), error);
-    process.exit(1);
   }
 }
 
-main();
+tryCatch(() => main());
