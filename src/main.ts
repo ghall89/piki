@@ -7,7 +7,7 @@ import { getImage } from './lib/get-image';
 import { invokeLocalModel } from './lib/invoke-local-model';
 
 async function main() {
-  const { path, prompt, showPreview } = getArguments();
+  const { path, model, showPreview } = getArguments();
   const config = await getConfig();
 
   const image = await getImage(path);
@@ -17,12 +17,15 @@ async function main() {
       console.log(await terminalImage.file(path, { width: 50 }));
     }
 
+    const DEFAULT_PROMPT =
+      'Describe this image for accessibility purposes. Do not comment on things that are not in the image. Avoid subjective statements. Do not describe things that are not actually in the image. Only comment on text if it exists. Do not describe the absence of anything in the image.';
+
     await invokeLocalModel({
-      model: config.model,
+      model: model ?? config.model,
       messages: [
         {
           role: 'user',
-          content: prompt,
+          content: config.prompt_override ?? DEFAULT_PROMPT,
           images: [image],
         },
       ],

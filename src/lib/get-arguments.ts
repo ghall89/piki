@@ -5,20 +5,19 @@ import { exitWithMessage } from './exit-with-message';
 export function getArguments(): {
   path: string;
   showPreview: boolean;
-  prompt: string;
+  model?: string;
 } {
   const { values, positionals } = parseArgs({
     args: Bun.argv,
     options: {
+      model: {
+        type: 'string',
+        short: 'm',
+      },
       preview: {
         type: 'boolean',
         default: false,
         short: 'p',
-      },
-      prompt: {
-        type: 'string',
-        default:
-          'Describe this image for accessibility purposes. Do not comment on things that are not in the image. Avoid subjective statements. Do not describe things that are not actually in the image. Only comment on text if it exists. Do not describe the absence of anything in the image.',
       },
     },
     allowPositionals: true,
@@ -33,6 +32,6 @@ export function getArguments(): {
   return {
     path,
     showPreview: values.preview,
-    prompt: values.prompt,
+    model: values?.model,
   };
 }
