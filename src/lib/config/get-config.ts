@@ -1,6 +1,6 @@
 import { Config } from './config-type';
 
-const CONFIG_PATH = `${Bun.env.HOME}/.picai`;
+const CONFIG_PATH = `${Bun.env.HOME}/.piki`;
 
 export async function getConfig(): Promise<Config> {
   const userConfig = Bun.file(CONFIG_PATH);
